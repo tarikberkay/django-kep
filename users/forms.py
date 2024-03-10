@@ -4,6 +4,20 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 
 from .models import Profile
 
+from django.utils import timezone 
+from .models import Contact
+
+class ContactForm(forms.ModelForm):
+    class Meta :
+        model = Contact
+        fields = ['name','email','phone_number','message']
+        widgets = {
+            'message': forms.Textarea(attrs={'cols':30, 'rows': 5})
+        }
+
+
+
+
 
 class RegisterForm(UserCreationForm):
     # fields we want to include and customize in our form

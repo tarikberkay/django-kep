@@ -10,11 +10,23 @@ from django.contrib.auth.decorators import login_required
 from .forms import RegisterForm, LoginForm, UpdateUserForm, UpdateProfileForm
 from django.http import HttpResponse
 
+from .forms import ContactForm
 
 
 @login_required
 def index(request):
     return render(request, "users/index.html")
+
+
+@login_required
+def tabletime(request):
+    return render(request, "tabletime.html")
+
+
+@login_required
+def awards(request):
+    return render(request, "awards.html ")
+
 
 @login_required
 def about(request):
@@ -22,6 +34,17 @@ def about(request):
 
 @login_required
 def contact(request):
+    if request.method == 'POST':
+        form = ContactForm(request.POST)
+        if form.is_valid():
+            name = form.cleaned_data['name']
+            email = form.cleaned_data['email']
+            message = form.cleaned_data['message']
+            form.save()
+            return redirect("thank-you")
+            
+    else:
+        form = ContactForm()
     return render(request, "contact.html")
 
 @login_required
@@ -40,6 +63,10 @@ def news(request):
 @login_required
 def staff(request):
     return render(request, "staff.html")
+
+@login_required
+def skorboard(request):
+    return render(request, "skorboard.html")
 
 
 
@@ -80,7 +107,7 @@ class RegisterView(View):
         return render(request, self.template_name, {'form': form})
 
 
-# Class based view that extends from the built in login view to add a remember me functionality
+
 class CustomLoginView(LoginView):
     form_class = LoginForm
 
@@ -88,13 +115,11 @@ class CustomLoginView(LoginView):
         remember_me = form.cleaned_data.get('remember_me')
 
         if not remember_me:
-            # set session expiry to 0 seconds. So it will automatically close the session after the browser is closed.
+
             self.request.session.set_expiry(0)
 
-            # Set session as modified to force data updates/cookie to be saved.
             self.request.session.modified = True
 
-        # else browser session will be as long as the session cookie time "SESSION_COOKIE_AGE" defined in settings.py
         return super(CustomLoginView, self).form_valid(form)
 
 
@@ -125,12 +150,11 @@ def profile(request):
             user_form.save()
             profile_form.save()
             messages.success(request, 'Your profile is updated successfully')
-            # return redirect(to='users-profile')
+
             return redirect(to='users-index')
     else:
         user_form = UpdateUserForm(instance=request.user)
         profile_form = UpdateProfileForm(instance=request.user.profile)
 
-    # return render(request, 'users/profile.html', {'user_form': user_form, 'profile_form': profile_form})
     return render(request, 'users/index.html', {'user_form': user_form, 'profile_form': profile_form})
 
